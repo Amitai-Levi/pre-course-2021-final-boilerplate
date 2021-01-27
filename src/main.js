@@ -1,7 +1,30 @@
-if (localStorage.taskList) {
-  viewSectionBuilder();
-}
+// import fetch from "fetch";
+// const fetch = require('fetch');
+//if (localStorage.taskList) {
+viewSectionBuilder();
+//}
 let sorted = false;
+
+async function getList() {
+  let req = "";
+  await fetch("https://api.jsonbin.io/b/60119d6f3126bb747e9fd46d/latest")
+    .then((response) => response.json())
+    .then((data) => (req = data));
+  console.log(req);
+  return req;
+}
+async function pushToList(data) {
+  await fetch("https://api.jsonbin.io/b/60119d6f3126bb747e9fd46d", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      versioning: "false",
+    },
+    body: JSON.stringify(data),
+  })
+    .then((res) => res.json)
+    .catch((error) => error);
+}
 
 document.querySelector("#add-button").addEventListener("click", addNewTask);
 document.querySelector("#sort-button").addEventListener("click", sort);
@@ -17,40 +40,39 @@ document.querySelector("#counter").innerText = document.querySelector(
   "#viewSection"
 ).childNodes.length;
 
-function addNewTask(event) {
-  const taskText = document.querySelector("#text-input");
-  const priority = document.querySelector("#priority-selector");
+async function addNewTask(event) {
+  const taskText = document.querySelector("#text-input").value;
+  const priority = document.querySelector("#priority-selector").value;
   const time = new Date();
   event.preventDefault();
 
   const task = {
-    text: taskText.value,
-    priority: priority.value,
+    text: taskText,
+    priority: priority,
     date: time.getTime(),
     realDate: new Date(time.getTime()).toString(),
   };
-  let tempList = [task];
-  console.log(JSON.stringify(tempList));
-  if (!localStorage.taskList) {
-    localStorage.taskList = JSON.stringify(tempList);
+
+  if (!getList()) {
+    await pushToList([task]);
   } else {
-    tempList = JSON.parse(localStorage.getItem("taskList"));
-    console.log(tempList);
-    tempList.push(task);
-    localStorage.setItem("taskList", JSON.stringify(tempList));
+    const currentList = await getList();
+    currentList.push(task);
+    await pushToList(currentList);
   }
   taskText.value = "";
   priority.value = 1;
 
-  tempList = JSON.parse(localStorage.taskList);
-  console.log(tempList[1]);
-
   viewSectionBuilder();
 }
-function viewSectionBuilder(tasks = JSON.parse(localStorage.taskList)) {
+async function viewSectionBuilder(tasks = false) {
   cleanView();
+  if (!tasks) {
+    tasks = await getList();
+    //tasks = tasks);
+  }
 
-  for (const task of tasks) {
+  for (let task of tasks) {
     document.querySelector("#viewSection").appendChild(TodoRowBuilder(task));
   }
   document.querySelector("#counter").innerText = document.querySelector(
@@ -88,9 +110,9 @@ function cleanView() {
   }
 }
 
-function sort(event) {
+async function sort(event) {
   event.preventDefault();
-  let tasks = JSON.parse(localStorage.taskList);
+  let tasks = await getList();
 
   sorted = !sorted;
 
