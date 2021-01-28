@@ -64,9 +64,9 @@ const projectName = "pre.Todo App";
 describe(projectName, () => {
   beforeAll(async () => {
     browser = await puppeteer.launch({
-      // headless: false, // Uncomment me to see tests running in browser
+      headless: false, // Uncomment me to see tests running in browser
       args: ["--disable-web-security"],
-      // slowMo: 50, // Uncomment and change me to slow down tests speed in browser.
+      //slowMo: 50, // Uncomment and change me to slow down tests speed in browser.
     });
     page = await browser.newPage();
     useNock(page, ["https://api.jsonbin.io/v3"]);
@@ -251,5 +251,49 @@ describe(projectName, () => {
 
     expect(text).toBe(mocks.fetchTest.record["my-todo"][0].text);
     expect(priority).toBe(mocks.fetchTest.record["my-todo"][0].priority);
+  });
+  test("Clicking the delete button should delete a task", async () => {
+    await nock("https://api.jsonbin.io/v3").get(/.*/).reply(200, mocks.initBin);
+
+    await nock("https://api.jsonbin.io/v3")
+      .persist()
+      .put(/.*/, () => true)
+      .reply(200, mocks.toDoAddResponse);
+
+    await page.goto(path, { waitUntil: "networkidle0" });
+
+    await page.type("#text-input", "can you delete me?");
+    await page.click("#add-button");
+
+    await page.waitForSelector(".todo-delete");
+
+    await page.click(".todo-delete");
+
+    const elements = await page.$$(".todo-text");
+    expect(elements.length).toBe(0);
+  });
+  test("Clicking the clear button should delete all tasks", async () => {
+    await nock("https://api.jsonbin.io/v3").get(/.*/).reply(200, mocks.initBin);
+
+    await nock("https://api.jsonbin.io/v3")
+      .persist()
+      .put(/.*/, () => true)
+      .reply(200, mocks.toDoAddResponse);
+
+    await page.goto(path, { waitUntil: "networkidle0" });
+
+    await page.type("#text-input", "can you delete me?");
+    await page.click("#add-button");
+
+    await page.type("#text-input", "maybe so");
+    await page.click("#add-button");
+
+    await page.type("#text-input", "but can you clear all of us in 1 click?");
+    await page.click("#add-button");
+
+    await page.click("#clear-button");
+
+    const elements = await page.$$(".todo-text");
+    expect(elements.length).toBe(0);
   });
 });
