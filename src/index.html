@@ -9,12 +9,16 @@
   </head>
   <body>
     <h1>My ToDo List</h1>
-    <span id="counter">0</span>
-    <span>tasks</span>
+    <h2>You have <span id="counter">0</span> tasks</h2>
     <section id="controlSection">
       <form action="" id="newTaskForm">
         <button id="sort-button">Sorted BY: Most Recent</button>
-        <input type="text" id="text-input" placeholder="insert ToDo" />
+        <input
+          type="text"
+          id="text-input"
+          placeholder="insert ToDo's"
+          required
+        />
         <select name="" id="priority-selector">
           <option value="1">1</option>
           <option value="2">2</option>

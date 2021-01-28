@@ -57,20 +57,15 @@ async function addNewTask(event) {
   if (jsonbinList.some((bin) => task.text === bin.text)) {
     return alert("This task already exist");
   }
-  //*if (!(await getList())) {
-  // if the current list is empty
-  //* await pushToList([task]); // push (replace the list with) an array with the first element
-  //*} else {
-  //* const currentList = await getList(); // get the current list,
-  jsonbinList.push(task); // push the new element to the array
-  //await pushToList(currentList); // and replace the new list with the current one
-  //*}
+  jsonbinList.push(task);
+
   // reset the form
   taskTextBox.value = "";
   PrioritySelectBox.value = 1;
 
   viewSectionBuilder(await pushToList(jsonbinList));
 }
+
 //the function builds the view section based on the task list
 async function viewSectionBuilder(tasksList = false) {
   // first, clean the view
@@ -79,6 +74,36 @@ async function viewSectionBuilder(tasksList = false) {
   // if the function didn't get a task list, generate it fron JSONBIN
   if (!tasksList) {
     tasksList = jsonbinList;
+  }
+  //if the tasks list isn't empty, make a headline top row
+  if (tasksList.length > 0) {
+    const container = document.createElement("div");
+    container.style.borderWidth = "6px";
+    container.style.marginBottom = "50px";
+    container.classList.add("headline-container");
+    container.classList.add("todo-container");
+
+    const priorityHeadline = document.createElement("span");
+    priorityHeadline.innerText = "Priority";
+    priorityHeadline.classList.add("grid-headline");
+    container.appendChild(priorityHeadline);
+
+    const taskHeadline = document.createElement("span");
+    taskHeadline.innerText = "ToDo Task";
+    taskHeadline.classList.add("grid-headline");
+    container.appendChild(taskHeadline);
+
+    const timeHeadline = document.createElement("span");
+    timeHeadline.innerText = "Create At";
+    timeHeadline.classList.add("grid-headline");
+    container.appendChild(timeHeadline);
+
+    const deleteHeadline = document.createElement("span");
+    deleteHeadline.innerText = "Delete";
+    deleteHeadline.classList.add("grid-headline");
+    container.appendChild(deleteHeadline);
+
+    document.querySelector("#viewSection").appendChild(container);
   }
 
   // takes every task on the list and makes it a row with the function 'TodoRowBuilder',
