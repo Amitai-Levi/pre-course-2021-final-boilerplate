@@ -1,30 +1,35 @@
-viewSectionBuilder();
-
+let jsonbinList = [];
+(async function () {
+  await getList();
+  await viewSectionBuilder();
+})();
 let sorted = false;
 // the function returns an array of ToDo elements fron JSONBIN
 async function getList() {
-  let toDoList = "";
-  await fetch("https://api.jsonbin.io/b/60119d6f3126bb747e9fd46d/latest")
+  await fetch("https://api.jsonbin.io/v3/b/60119d6f3126bb747e9fd46d/latest")
     .then((response) => response.json())
-    .then((retrievedData) => (toDoList = retrievedData));
-  console.log(toDoList);
-  return toDoList;
+    .then((retrievedData) => (jsonbinList = retrievedData.record["my-todo"]));
 }
 //the function gets a new list and replaces it with the old one in JSONBIN
 async function pushToList(newList) {
-  await fetch("https://api.jsonbin.io/b/60119d6f3126bb747e9fd46d", {
+  let toDoList = "";
+  await fetch("https://api.jsonbin.io/v3/b/60119d6f3126bb747e9fd46d", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(newList),
+    body: JSON.stringify({ "my-todo": newList }),
   })
-    .then((response) => response.json)
+    .then((response) => response.json())
+    .then((outcome) => outcome.record["my-todo"])
     .catch((error) => error);
+  jsonbinList = newList;
+  return newList;
 }
 // assigning event listener to 'sort' and 'add' buttons
 document.querySelector("#add-button").addEventListener("click", addNewTask);
 document.querySelector("#sort-button").addEventListener("click", sort);
+document.querySelector("#clear-button").addEventListener("click", clear);
 
 //setting the counter text to the number of view section's children (each child is a task container)
 document.querySelector("#counter").innerText = document.querySelector(
@@ -45,22 +50,26 @@ async function addNewTask(event) {
     text: taskTextBox.value,
     priority: PrioritySelectBox.value,
     date: time.getTime(),
-    realDate: new Date(time.getTime()).toString(),
   };
-
-  if (!(await getList())) {
-    // if the current list is empty
-    await pushToList([task]); // push (replace the list with) an array with the first element
-  } else {
-    const currentList = await getList(); // get the current list,
-    currentList.push(task); // push the new element to the array
-    await pushToList(currentList); // and replace the new list with the current one
+  console.log("Tak.text = " + task.text);
+  console.log(jsonbinList);
+  console.log(jsonbinList.some((bin) => bin.text));
+  if (jsonbinList.some((bin) => task.text === bin.text)) {
+    return alert("This task already exist");
   }
+  //*if (!(await getList())) {
+  // if the current list is empty
+  //* await pushToList([task]); // push (replace the list with) an array with the first element
+  //*} else {
+  //* const currentList = await getList(); // get the current list,
+  jsonbinList.push(task); // push the new element to the array
+  //await pushToList(currentList); // and replace the new list with the current one
+  //*}
   // reset the form
   taskTextBox.value = "";
   PrioritySelectBox.value = 1;
 
-  viewSectionBuilder();
+  viewSectionBuilder(await pushToList(jsonbinList));
 }
 //the function builds the view section based on the task list
 async function viewSectionBuilder(tasksList = false) {
@@ -69,7 +78,7 @@ async function viewSectionBuilder(tasksList = false) {
 
   // if the function didn't get a task list, generate it fron JSONBIN
   if (!tasksList) {
-    tasksList = await getList();
+    tasksList = jsonbinList;
   }
 
   // takes every task on the list and makes it a row with the function 'TodoRowBuilder',
@@ -105,6 +114,12 @@ function TodoRowBuilder(task) {
   taskTime.classList.add("todo-created-at");
   container.appendChild(taskTime);
 
+  const deleteButton = document.createElement("button");
+  deleteButton.innerText = "Delete";
+  deleteButton.addEventListener("click", onDelete);
+  deleteButton.classList.add("todo-delete");
+  container.appendChild(deleteButton);
+
   return container;
 }
 
@@ -121,7 +136,10 @@ function cleanView() {
 // to 'viewSectionBuilder' so it will rebuild the view section with the sorted list
 async function sort(event) {
   event.preventDefault();
-  let tasksList = await getList();
+  let tasksList = [];
+  for (const task of jsonbinList) {
+    tasksList.push(task);
+  }
 
   sorted = !sorted;
 
@@ -140,4 +158,24 @@ async function sort(event) {
   viewSectionBuilder(tasksList);
 }
 
+//the function clears all the data from JSONBIN
+async function clear(event) {
+  event.preventDefault();
+
+  const empty = [];
+  await pushToList(empty);
+  await viewSectionBuilder();
+}
+async function onDelete(event) {
+  const button = event.target;
+
+  const todoText = button.parentNode.getElementsByClassName("todo-text")[0]
+    .innerText;
+
+  const deleteIndex = jsonbinList.findIndex((task) => task.text === todoText);
+
+  jsonbinList.splice(deleteIndex, 1);
+
+  await pushToList(jsonbinList);
+  await viewSectionBuilder();
 }

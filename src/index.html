@@ -4,16 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My TODO List</title>
-    <script src="./utils.js"></script>
+    <!-- <script src="./utils.js"></script> -->
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <div id="counter">0</div>
-    <h1>Tasks</h1>
+    <h1>My ToDo List</h1>
+    <span id="counter">0</span>
+    <span>tasks</span>
     <section id="controlSection">
       <form action="" id="newTaskForm">
         <button id="sort-button">Sorted BY: Most Recent</button>
-        <input type="text" id="text-input" />
+        <input type="text" id="text-input" placeholder="insert ToDo" />
         <select name="" id="priority-selector">
           <option value="1">1</option>
           <option value="2">2</option>
@@ -22,6 +23,7 @@
           <option value="5">5</option>
         </select>
         <button id="add-button">Add</button>
+        <button id="clear-button">Clear</button>
       </form>
     </section>
     <section id="viewSection"></section>
