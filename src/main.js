@@ -32,9 +32,7 @@ document.querySelector("#sort-button").addEventListener("click", sort);
 document.querySelector("#clear-button").addEventListener("click", clear);
 
 //setting the counter text to the number of view section's children (each child is a task container)
-document.querySelector("#counter").innerText = document.querySelector(
-  "#viewSection"
-).childNodes.length;
+document.querySelector("#counter").innerText = jsonbinList.length;
 
 // the function adds a new task by creating a new task element, getting the current data from JSONBIN,
 // pushing it to the list array, and then sending it back to JSONBIN
@@ -76,11 +74,9 @@ async function viewSectionBuilder(tasksList = false) {
     tasksList = jsonbinList;
   }
   //if the tasks list isn't empty, make a headline top row
-  if (tasksList.length > 0) {
+  if (tasksList.length > 0 && !document.getElementById("headline-container")) {
     const container = document.createElement("div");
-    container.style.borderWidth = "6px";
-    container.style.marginBottom = "50px";
-    container.classList.add("headline-container");
+    container.id = "headline-container";
     container.classList.add("todo-container");
 
     const priorityHeadline = document.createElement("span");
@@ -103,7 +99,8 @@ async function viewSectionBuilder(tasksList = false) {
     deleteHeadline.classList.add("grid-headline");
     container.appendChild(deleteHeadline);
 
-    document.querySelector("#viewSection").appendChild(container);
+    document.querySelector("#controlSection").appendChild(container);
+    document.getElementById("clear-button").innerText = "clear";
   }
 
   // takes every task on the list and makes it a row with the function 'TodoRowBuilder',
@@ -112,9 +109,7 @@ async function viewSectionBuilder(tasksList = false) {
     document.querySelector("#viewSection").appendChild(TodoRowBuilder(task));
   }
   //update the counter value
-  document.querySelector("#counter").innerText = document.querySelector(
-    "#viewSection"
-  ).childNodes.length;
+  document.querySelector("#counter").innerText = jsonbinList.length;
 }
 
 //the function gets a task and makes it a row
@@ -122,6 +117,8 @@ function TodoRowBuilder(task) {
   const container = document.createElement("div");
 
   container.classList.add("todo-container");
+  container.classList.add("draggable");
+  container.addEventListener("mousedown", mouseDownHandler);
 
   const PrioritySpan = document.createElement("span");
   PrioritySpan.innerText = task.priority;
@@ -151,7 +148,11 @@ function TodoRowBuilder(task) {
 //the function removes the view section's content
 function cleanView() {
   const viewSection = document.querySelector("#viewSection");
+  const controlSection = document.querySelector("#controlSection");
 
+  if (controlSection.lastChild.id === "headline-container") {
+    controlSection.removeChild(controlSection.lastChild);
+  }
   while (viewSection.lastChild) {
     viewSection.removeChild(viewSection.lastChild);
   }
@@ -190,6 +191,7 @@ async function clear(event) {
   const empty = [];
   await pushToList(empty);
   await viewSectionBuilder();
+  document.getElementById("clear-button").innerText = "cleared";
 }
 async function onDelete(event) {
   const button = event.target;
@@ -204,3 +206,125 @@ async function onDelete(event) {
   await pushToList(jsonbinList);
   await viewSectionBuilder();
 }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////Drag'n'Drop//////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Query the list element
+const list = document.getElementById("viewSection");
+
+let draggingEle;
+let placeholder;
+let isDraggingStarted = false;
+
+// The current position of mouse relative to the dragging element
+let x = 0;
+let y = 0;
+
+// Swap two nodes
+const swap = function (nodeA, nodeB) {
+  const parentA = nodeA.parentNode;
+  const siblingA = nodeA.nextSibling === nodeB ? nodeA : nodeA.nextSibling;
+
+  sorted = false;
+  document.getElementById("sort-button").innerText = "Sorted BY: Freestyle";
+  // Move `nodeA` to before the `nodeB`
+  nodeB.parentNode.insertBefore(nodeA, nodeB);
+
+  // Move `nodeB` to before the sibling of `nodeA`
+  parentA.insertBefore(nodeB, siblingA);
+};
+
+// Check if `nodeA` is above `nodeB`
+const isAbove = function (nodeA, nodeB) {
+  // Get the bounding rectangle of nodes
+  const rectA = nodeA.getBoundingClientRect();
+  const rectB = nodeB.getBoundingClientRect();
+
+  return rectA.top + rectA.height / 2 < rectB.top + rectB.height / 2;
+};
+
+const mouseDownHandler = function (e) {
+  if (e.currentTarget.classList.contains("draggable")) {
+    draggingEle = e.currentTarget;
+
+    // Calculate the mouse position
+    const rect = draggingEle.getBoundingClientRect();
+    x = e.pageX - rect.left;
+    y = e.pageY - rect.top;
+
+    // Attach the listeners to `document`
+    document.addEventListener("mousemove", mouseMoveHandler);
+    document.addEventListener("mouseup", mouseUpHandler);
+  }
+};
+
+const mouseMoveHandler = function (e) {
+  const draggingRect = draggingEle.getBoundingClientRect();
+
+  if (!isDraggingStarted) {
+    isDraggingStarted = true;
+
+    // Let the placeholder take the height of dragging element
+    // So the next element won't move up
+    placeholder = document.createElement("div");
+    placeholder.classList.add("placeholder");
+    draggingEle.parentNode.insertBefore(placeholder, draggingEle.nextSibling);
+    placeholder.style.height = `${draggingRect.height}px`;
+  }
+
+  // Set position for dragging element
+  draggingEle.style.position = "absolute";
+  draggingEle.style.top = `${e.pageY - y}px`;
+  draggingEle.style.left = `${e.pageX - x}px`;
+
+  // The current order
+  // prevEle
+  // draggingEle
+  // placeholder
+  // nextEle
+  const prevEle = draggingEle.previousElementSibling;
+  const nextEle = placeholder.nextElementSibling;
+
+  // The dragging element is above the previous element
+  // User moves the dragging element to the top
+  if (prevEle && isAbove(draggingEle, prevEle)) {
+    // The current order    -> The new order
+    // prevEle              -> placeholder
+    // draggingEle          -> draggingEle
+    // placeholder          -> prevEle
+    swap(placeholder, draggingEle);
+    swap(placeholder, prevEle);
+    return;
+  }
+
+  // The dragging element is below the next element
+  // User moves the dragging element to the bottom
+  if (nextEle && isAbove(nextEle, draggingEle)) {
+    // The current order    -> The new order
+    // draggingEle          -> nextEle
+    // placeholder          -> placeholder
+    // nextEle              -> draggingEle
+    swap(nextEle, placeholder);
+    swap(nextEle, draggingEle);
+  }
+};
+
+const mouseUpHandler = function () {
+  // Remove the placeholder
+  placeholder && placeholder.parentNode.removeChild(placeholder);
+
+  draggingEle.style.removeProperty("top");
+  draggingEle.style.removeProperty("left");
+  draggingEle.style.removeProperty("position");
+
+  x = null;
+  y = null;
+  draggingEle = null;
+  isDraggingStarted = false;
+
+  // Remove the handlers of `mousemove` and `mouseup`
+  document.removeEventListener("mousemove", mouseMoveHandler);
+  document.removeEventListener("mouseup", mouseUpHandler);
+};
+
+// Query all items
