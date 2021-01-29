@@ -29,6 +29,12 @@ select,
   margin-left: 20px;
   font-size: 20px;
 }
+input[type="text"] {
+  -webkit-border-radius: 6;
+  -moz-border-radius: 6;
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.28);
+}
 h1 {
   color: #ffffff;
   font-size: 50px;

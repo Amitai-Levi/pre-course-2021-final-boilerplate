@@ -95,7 +95,7 @@ async function viewSectionBuilder(tasksList = false) {
     container.appendChild(timeHeadline);
 
     const deleteHeadline = document.createElement("span");
-    deleteHeadline.innerText = "Delete";
+    deleteHeadline.innerText = "Delete/Edit";
     deleteHeadline.classList.add("grid-headline");
     container.appendChild(deleteHeadline);
 
@@ -136,11 +136,21 @@ function TodoRowBuilder(task) {
   taskTime.classList.add("todo-created-at");
   container.appendChild(taskTime);
 
+  const deleteNeditContainer = document.createElement("span");
+
   const deleteButton = document.createElement("button");
   deleteButton.innerText = "Delete";
   deleteButton.addEventListener("click", onDelete);
   deleteButton.classList.add("todo-delete");
-  container.appendChild(deleteButton);
+  deleteNeditContainer.appendChild(deleteButton);
+
+  const editButton = document.createElement("button");
+  editButton.innerText = "Edit";
+  editButton.addEventListener("click", onEdit);
+  editButton.classList.add("todo-edit");
+  deleteNeditContainer.appendChild(editButton);
+
+  container.appendChild(deleteNeditContainer);
 
   return container;
 }
@@ -196,8 +206,9 @@ async function clear(event) {
 async function onDelete(event) {
   const button = event.target;
 
-  const todoText = button.parentNode.getElementsByClassName("todo-text")[0]
-    .innerText;
+  const todoText = button.parentNode.parentNode.getElementsByClassName(
+    "todo-text"
+  )[0].innerText;
 
   const deleteIndex = jsonbinList.findIndex((task) => task.text === todoText);
 
@@ -205,6 +216,62 @@ async function onDelete(event) {
 
   await pushToList(jsonbinList);
   await viewSectionBuilder();
+}
+// the function edits a todo task
+async function onEdit(event) {
+  const taskContainer = event.target.parentNode.parentNode;
+  taskContainer.removeEventListener("mousedown", mouseDownHandler);
+  const todoText = taskContainer.getElementsByClassName("todo-text")[0]
+    .innerText;
+
+  const editIndex = jsonbinList.findIndex((task) => task.text === todoText);
+
+  //removing all of the content in the container befor replacing it with a form
+  while (taskContainer.lastChild) {
+    taskContainer.removeChild(taskContainer.lastChild);
+  }
+  // creating an edit form
+  const priorityInput = document.createElement("input");
+  priorityInput.type = "number";
+  priorityInput.value = jsonbinList[editIndex].priority;
+  priorityInput.requierd = true;
+  priorityInput.max = 5;
+  priorityInput.min = 1;
+  taskContainer.appendChild(priorityInput);
+
+  const TextInput = document.createElement("input");
+  TextInput.type = "text";
+  TextInput.value = todoText;
+  TextInput.requierd = true;
+  taskContainer.appendChild(TextInput);
+
+  const finishEditBtn = document.createElement("button");
+  finishEditBtn.innerText = "Done";
+  finishEditBtn.addEventListener("click", finishEdit);
+  taskContainer.appendChild(finishEditBtn);
+
+  const cancelEditBtn = document.createElement("button");
+  cancelEditBtn.innerText = "Cancel";
+  cancelEditBtn.addEventListener("click", cancelEdit);
+  taskContainer.appendChild(cancelEditBtn);
+
+  async function finishEdit() {
+    if (TextInput.value && priorityInput.value) {
+      jsonbinList[editIndex].text = TextInput.value;
+      jsonbinList[editIndex].priority = priorityInput.value;
+      taskContainer.addEventListener("mousedown", mouseDownHandler);
+
+      await pushToList(jsonbinList);
+      await viewSectionBuilder();
+    } else {
+      alert("Don't leave an empty field");
+    }
+  }
+  async function cancelEdit() {
+    taskContainer.addEventListener("mousedown", mouseDownHandler);
+
+    await viewSectionBuilder();
+  }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////Drag'n'Drop//////////////////////////////////////////////////////////////////////////
