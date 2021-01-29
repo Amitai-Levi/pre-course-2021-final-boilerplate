@@ -45,9 +45,14 @@ h1 {
   grid-template-columns: 1fr 1fr 1fr 1fr;
   grid-template-rows: 1;
 }
-button:hover {
+button:hover,
+.fa:hover {
   cursor: pointer;
   transform: scale(1.2);
+}
+.fa {
+  margin-left: 20%;
+  font-size: 30px;
 }
 .grid-headline {
   font-size: 30px;
@@ -60,8 +65,10 @@ button:hover {
   border-width: 6px;
   margin-bottom: 50px;
 }
-.draggable {
+.fa-bars:hover {
   cursor: grab;
+}
+.draggable {
   margin-bottom: 1rem;
   user-select: none;
 }

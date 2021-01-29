@@ -118,7 +118,7 @@ function TodoRowBuilder(task) {
 
   container.classList.add("todo-container");
   container.classList.add("draggable");
-  container.addEventListener("mousedown", mouseDownHandler);
+  // container.addEventListener("mousedown", mouseDownHandler);
 
   const PrioritySpan = document.createElement("span");
   PrioritySpan.innerText = task.priority;
@@ -138,18 +138,23 @@ function TodoRowBuilder(task) {
 
   const deleteNeditContainer = document.createElement("span");
 
-  const deleteButton = document.createElement("button");
-  deleteButton.innerText = "Delete";
+  const deleteButton = document.createElement("i");
   deleteButton.addEventListener("click", onDelete);
-  deleteButton.classList.add("todo-delete");
+  deleteButton.classList.add("todo-delete", "fa", "fa-trash");
+
   deleteNeditContainer.appendChild(deleteButton);
 
-  const editButton = document.createElement("button");
-  editButton.innerText = "Edit";
+  const editButton = document.createElement("i");
   editButton.addEventListener("click", onEdit);
-  editButton.classList.add("todo-edit");
+  editButton.classList.add("todo-edit", "fa", "fa-pencil-square-o");
   deleteNeditContainer.appendChild(editButton);
 
+  const dragButton = document.createElement("i");
+  dragButton.addEventListener("mousedown", mouseDownHandler);
+  dragButton.classList.add("todo-edit", "fa", "fa-bars");
+  deleteNeditContainer.appendChild(dragButton);
+
+  //fa-pencil-square-o
   container.appendChild(deleteNeditContainer);
 
   return container;
@@ -245,14 +250,14 @@ async function onEdit(event) {
   TextInput.requierd = true;
   taskContainer.appendChild(TextInput);
 
-  const finishEditBtn = document.createElement("button");
-  finishEditBtn.innerText = "Done";
+  const finishEditBtn = document.createElement("i");
   finishEditBtn.addEventListener("click", finishEdit);
+  finishEditBtn.classList.add("fa", "fa-check");
   taskContainer.appendChild(finishEditBtn);
 
-  const cancelEditBtn = document.createElement("button");
-  cancelEditBtn.innerText = "Cancel";
+  const cancelEditBtn = document.createElement("i");
   cancelEditBtn.addEventListener("click", cancelEdit);
+  cancelEditBtn.classList.add("fa", "fa-times");
   taskContainer.appendChild(cancelEditBtn);
 
   async function finishEdit() {
@@ -311,8 +316,8 @@ const isAbove = function (nodeA, nodeB) {
 };
 
 const mouseDownHandler = function (e) {
-  if (e.currentTarget.classList.contains("draggable")) {
-    draggingEle = e.currentTarget;
+  if (e.target.parentNode.parentNode.classList.contains("draggable")) {
+    draggingEle = e.target.parentNode.parentNode;
 
     // Calculate the mouse position
     const rect = draggingEle.getBoundingClientRect();
