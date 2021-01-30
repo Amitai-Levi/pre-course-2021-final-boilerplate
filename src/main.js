@@ -1,5 +1,8 @@
-let jsonbinList = [];
-let changesList = [];
+//this list comes from jsonbin and it's the main data of the page
+let mainToDoList = [];
+//this list saves data about undo and redo actions
+let undoList = [];
+let redoList = [];
 
 (async function () {
   await getList();
@@ -10,7 +13,7 @@ let sorted = false;
 async function getList() {
   await fetch("https://api.jsonbin.io/v3/b/60119d6f3126bb747e9fd46d/latest")
     .then((response) => response.json())
-    .then((retrievedData) => (jsonbinList = retrievedData.record["my-todo"]));
+    .then((retrievedData) => (mainToDoList = retrievedData.record["my-todo"]));
 }
 //the function gets a new list and replaces it with the old one in JSONBIN
 async function pushToList(newList) {
@@ -25,7 +28,7 @@ async function pushToList(newList) {
     .then((response) => response.json())
     .then((outcome) => outcome.record["my-todo"])
     .catch((error) => error);
-  jsonbinList = newList;
+  mainToDoList = newList;
   return newList;
 }
 // assigning event listener to 'sort' and 'add' buttons
@@ -34,12 +37,12 @@ document.querySelector("#sort-button").addEventListener("click", sort);
 document.querySelector("#clear-button").addEventListener("click", clear);
 
 //setting the counter text to the number of view section's children (each child is a task container)
-document.querySelector("#counter").innerText = jsonbinList.length;
+document.querySelector("#counter").innerText = mainToDoList.length;
 
 // the function adds a new task by creating a new task element, getting the current data from JSONBIN,
 // pushing it to the list array, and then sending it back to JSONBIN
 async function addNewTask(event) {
-  changesList.push(duplicateArray(jsonbinList));
+  undoList.push(duplicateArray(mainToDoList));
   //getting data from the form
   const taskTextBox = document.querySelector("#text-input");
   const PrioritySelectBox = document.querySelector("#priority-selector");
@@ -53,20 +56,20 @@ async function addNewTask(event) {
     date: time.getTime(),
   };
   console.log("Tak.text = " + task.text);
-  console.log(jsonbinList);
-  console.log(jsonbinList.some((bin) => bin.text));
-  if (jsonbinList.some((bin) => task.text === bin.text)) {
+  console.log(mainToDoList);
+  console.log(mainToDoList.some((bin) => bin.text));
+  if (mainToDoList.some((bin) => task.text === bin.text)) {
     return alert("This task already exist");
   }
-  jsonbinList.push(task);
+  mainToDoList.push(task);
 
   // reset the form
   taskTextBox.value = "";
   PrioritySelectBox.value = 1;
 
-  viewSectionBuilder(jsonbinList);
-  document.querySelector("#save").hidden = false;
-  document.querySelector("#undo").hidden = false;
+  viewSectionBuilder(mainToDoList);
+  document.querySelector("#save").disabled = false;
+  document.querySelector("#undo").disabled = false;
 }
 
 //the function builds the view section based on the task list
@@ -76,7 +79,7 @@ async function viewSectionBuilder(tasksList = false) {
 
   // if the function didn't get a task list, generate it fron JSONBIN
   if (!tasksList) {
-    tasksList = jsonbinList;
+    tasksList = mainToDoList;
   }
   //if the tasks list isn't empty, make a headline top row
   if (tasksList.length > 0 && !document.getElementById("headline-container")) {
@@ -114,7 +117,7 @@ async function viewSectionBuilder(tasksList = false) {
     document.querySelector("#viewSection").appendChild(TodoRowBuilder(task));
   }
   //update the counter value
-  document.querySelector("#counter").innerText = jsonbinList.length;
+  document.querySelector("#counter").innerText = mainToDoList.length;
 }
 
 //the function gets a task and makes it a row
@@ -181,10 +184,10 @@ function cleanView() {
 // the function sorts the list in JSONBIN by priority, and then sends the sorted list
 // to 'viewSectionBuilder' so it will rebuild the view section with the sorted list
 async function sort(event) {
-  changesList.push(duplicateArray(jsonbinList));
+  undoList.push(duplicateArray(mainToDoList));
   event.preventDefault();
   let tasksList = [];
-  for (const task of jsonbinList) {
+  for (const task of mainToDoList) {
     tasksList.push(task);
   }
 
@@ -203,35 +206,35 @@ async function sort(event) {
     document.querySelector("#sort-button").innerText = "Sorted BY: Most Recent";
   }
   viewSectionBuilder(tasksList);
-  document.querySelector("#save").hidden = false;
-  document.querySelector("#undo").hidden = false;
+  document.querySelector("#save").disabled = false;
+  document.querySelector("#undo").disabled = false;
 }
 
 //the function clears all the data from JSONBIN
 async function clear(event) {
-  changesList.push(duplicateArray(jsonbinList));
+  undoList.push(duplicateArray(mainToDoList));
   event.preventDefault();
 
-  jsonbinList = [];
-  await viewSectionBuilder(jsonbinList);
+  mainToDoList = [];
+  await viewSectionBuilder(mainToDoList);
   document.getElementById("clear-button").innerText = "cleared";
-  document.querySelector("#save").hidden = false;
+  document.querySelector("#save").disabled = false;
 }
 async function onDelete(event) {
-  changesList.push(duplicateArray(jsonbinList));
+  undoList.push(duplicateArray(mainToDoList));
   const button = event.target;
 
   const todoText = button.parentNode.parentNode.getElementsByClassName(
     "todo-text"
   )[0].innerText;
 
-  const deleteIndex = jsonbinList.findIndex((task) => task.text === todoText);
+  const deleteIndex = mainToDoList.findIndex((task) => task.text === todoText);
 
-  jsonbinList.splice(deleteIndex, 1);
+  mainToDoList.splice(deleteIndex, 1);
 
-  await viewSectionBuilder(jsonbinList);
-  document.querySelector("#save").hidden = false;
-  document.querySelector("#undo").hidden = false;
+  await viewSectionBuilder(mainToDoList);
+  document.querySelector("#save").disabled = false;
+  document.querySelector("#undo").disabled = false;
 }
 // the function edits a todo task
 async function onEdit(event) {
@@ -240,7 +243,7 @@ async function onEdit(event) {
   const todoText = taskContainer.getElementsByClassName("todo-text")[0]
     .innerText;
 
-  const editIndex = jsonbinList.findIndex((task) => task.text === todoText);
+  const editIndex = mainToDoList.findIndex((task) => task.text === todoText);
 
   //removing all of the content in the container befor replacing it with a form
   while (taskContainer.lastChild) {
@@ -249,7 +252,7 @@ async function onEdit(event) {
   // creating an edit form
   const priorityInput = document.createElement("input");
   priorityInput.type = "number";
-  priorityInput.value = jsonbinList[editIndex].priority;
+  priorityInput.value = mainToDoList[editIndex].priority;
   priorityInput.requierd = true;
   priorityInput.max = 5;
   priorityInput.min = 1;
@@ -273,17 +276,17 @@ async function onEdit(event) {
 
   async function finishEdit() {
     if (TextInput.value && priorityInput.value) {
-      changesList.push(duplicateArray(jsonbinList));
-      jsonbinList[editIndex].text = TextInput.value;
-      jsonbinList[editIndex].priority = priorityInput.value;
+      undoList.push(duplicateArray(mainToDoList));
+      mainToDoList[editIndex].text = TextInput.value;
+      mainToDoList[editIndex].priority = priorityInput.value;
       taskContainer.addEventListener("mousedown", mouseDownHandler);
 
-      await viewSectionBuilder(jsonbinList);
+      await viewSectionBuilder(mainToDoList);
     } else {
       alert("Don't leave an empty field");
     }
-    document.querySelector("#save").hidden = false;
-    document.querySelector("#undo").hidden = false;
+    document.querySelector("#save").disabled = false;
+    document.querySelector("#undo").disabled = false;
   }
   async function cancelEdit() {
     taskContainer.addEventListener("mousedown", mouseDownHandler);
@@ -293,18 +296,20 @@ async function onEdit(event) {
 }
 // thw functions saves the changes by the user
 async function save() {
-  document.querySelector("#save").hidden = true;
-  await pushToList(jsonbinList);
+  document.querySelector("#save").disabled = true;
+  await pushToList(mainToDoList);
   alert("saved!");
 }
 async function undo() {
-  if (changesList.length > 0) {
-    jsonbinList = changesList.pop();
+  if (undoList.length > 0) {
+    redoList.push(duplicateArray(mainToDoList));
+    mainToDoList = undoList.pop();
+    document.querySelector("#redo").disabled = false;
   }
-  if (changesList.length === 0) {
-    document.querySelector("#undo").hidden = true;
+  if (undoList.length === 0) {
+    document.querySelector("#undo").disabled = true;
   }
-  await viewSectionBuilder(jsonbinList);
+  await viewSectionBuilder(mainToDoList);
 }
 function duplicateArray(array) {
   let duplicate = [];
@@ -312,6 +317,16 @@ function duplicateArray(array) {
     duplicate.push(element);
   }
   return duplicate;
+}
+async function redo() {
+  if (redoList.length > 0) {
+    undoList.push(duplicateArray(mainToDoList));
+    mainToDoList = redoList.pop();
+  }
+  if (redoList.length === 0) {
+    document.querySelector("#redo").disabled = true;
+  }
+  await viewSectionBuilder(mainToDoList);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////Drag'n'Drop//////////////////////////////////////////////////////////////////////////

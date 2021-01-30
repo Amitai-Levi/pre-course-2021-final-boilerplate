@@ -36,8 +36,21 @@ select,
 }
 #undo {
   position: fixed;
-  left: 120px;
+  left: 140px;
   top: 15px;
+}
+#redo {
+  position: fixed;
+  left: 255px;
+  top: 15px;
+}
+button:disabled {
+  color: gray;
+  border-color: gray;
+}
+button:disabled:hover {
+  transform: scale(1);
+  cursor: default;
 }
 select option[value="1"] {
   background: #85c1e9;
