@@ -61,7 +61,8 @@ async function addNewTask(event) {
   taskTextBox.value = "";
   PrioritySelectBox.value = 1;
 
-  viewSectionBuilder(await pushToList(jsonbinList));
+  viewSectionBuilder(jsonbinList);
+  document.querySelector("#save").hidden = false;
 }
 
 //the function builds the view section based on the task list
@@ -197,16 +198,17 @@ async function sort(event) {
     document.querySelector("#sort-button").innerText = "Sorted BY: Most Recent";
   }
   viewSectionBuilder(tasksList);
+  document.querySelector("#save").hidden = false;
 }
 
 //the function clears all the data from JSONBIN
 async function clear(event) {
   event.preventDefault();
 
-  const empty = [];
-  await pushToList(empty);
-  await viewSectionBuilder();
+  jsonbinList = [];
+  await viewSectionBuilder(jsonbinList);
   document.getElementById("clear-button").innerText = "cleared";
+  document.querySelector("#save").hidden = false;
 }
 async function onDelete(event) {
   const button = event.target;
@@ -219,8 +221,8 @@ async function onDelete(event) {
 
   jsonbinList.splice(deleteIndex, 1);
 
-  await pushToList(jsonbinList);
-  await viewSectionBuilder();
+  await viewSectionBuilder(jsonbinList);
+  document.querySelector("#save").hidden = false;
 }
 // the function edits a todo task
 async function onEdit(event) {
@@ -266,17 +268,23 @@ async function onEdit(event) {
       jsonbinList[editIndex].priority = priorityInput.value;
       taskContainer.addEventListener("mousedown", mouseDownHandler);
 
-      await pushToList(jsonbinList);
-      await viewSectionBuilder();
+      await viewSectionBuilder(jsonbinList);
     } else {
       alert("Don't leave an empty field");
     }
+    document.querySelector("#save").hidden = false;
   }
   async function cancelEdit() {
     taskContainer.addEventListener("mousedown", mouseDownHandler);
 
     await viewSectionBuilder();
   }
+}
+// thw functions saves the changes by the user
+async function save() {
+  document.querySelector("#save").hidden = true;
+  await pushToList(jsonbinList);
+  alert("saved!");
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////Drag'n'Drop//////////////////////////////////////////////////////////////////////////
@@ -291,7 +299,7 @@ let isDraggingStarted = false;
 // The current position of mouse relative to the dragging element
 let x = 0;
 let y = 0;
-
+let currentWidth = 0;
 // Swap two nodes
 const swap = function (nodeA, nodeB) {
   const parentA = nodeA.parentNode;
@@ -318,11 +326,11 @@ const isAbove = function (nodeA, nodeB) {
 const mouseDownHandler = function (e) {
   if (e.target.parentNode.parentNode.classList.contains("draggable")) {
     draggingEle = e.target.parentNode.parentNode;
-
     // Calculate the mouse position
     const rect = draggingEle.getBoundingClientRect();
     x = e.pageX - rect.left;
     y = e.pageY - rect.top;
+    currentWidth = rect.width;
 
     // Attach the listeners to `document`
     document.addEventListener("mousemove", mouseMoveHandler);
@@ -345,10 +353,10 @@ const mouseMoveHandler = function (e) {
   }
 
   // Set position for dragging element
-  draggingEle.style.position = "absolute";
+  draggingEle.style.position = "fixed";
   draggingEle.style.top = `${e.pageY - y}px`;
   draggingEle.style.left = `${e.pageX - x}px`;
-
+  draggingEle.style.width = currentWidth + "px";
   // The current order
   // prevEle
   // draggingEle
@@ -398,5 +406,3 @@ const mouseUpHandler = function () {
   document.removeEventListener("mousemove", mouseMoveHandler);
   document.removeEventListener("mouseup", mouseUpHandler);
 };
-
-// Query all items

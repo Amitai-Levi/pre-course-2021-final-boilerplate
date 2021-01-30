@@ -11,7 +11,6 @@ html {
 }
 button,
 input,
-select option,
 select,
 .todo-container {
   -webkit-border-radius: 28;
@@ -28,7 +27,29 @@ select,
   text-decoration: none;
   margin-left: 20px;
   font-size: 20px;
+  box-sizing: border-box;
 }
+#save {
+  position: fixed;
+  left: 15px;
+  top: 15px;
+}
+select option[value="1"] {
+  background: #85c1e9;
+}
+select option[value="2"] {
+  background: #5dade2;
+}
+select option[value="3"] {
+  background: #3498db;
+}
+select option[value="4"] {
+  background: #2e86c1;
+}
+select option[value="5"] {
+  background: #2874a6;
+}
+
 input[type="text"] {
   -webkit-border-radius: 6;
   -moz-border-radius: 6;
