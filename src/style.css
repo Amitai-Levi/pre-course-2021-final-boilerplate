@@ -34,6 +34,11 @@ select,
   left: 15px;
   top: 15px;
 }
+#undo {
+  position: fixed;
+  left: 120px;
+  top: 15px;
+}
 select option[value="1"] {
   background: #85c1e9;
 }
