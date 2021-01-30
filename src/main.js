@@ -296,6 +296,7 @@ async function onEdit(event) {
 }
 // thw functions saves the changes by the user
 async function save() {
+  preserveOrder();
   document.querySelector("#save").disabled = true;
   await pushToList(mainToDoList);
   alert("saved!");
@@ -368,6 +369,9 @@ const isAbove = function (nodeA, nodeB) {
 const mouseDownHandler = function (e) {
   if (e.target.parentNode.parentNode.classList.contains("draggable")) {
     draggingEle = e.target.parentNode.parentNode;
+    undoList.push(duplicateArray(mainToDoList));
+    document.querySelector("#save").disabled = false;
+
     // Calculate the mouse position
     const rect = draggingEle.getBoundingClientRect();
     x = e.pageX - rect.left;
@@ -448,3 +452,17 @@ const mouseUpHandler = function () {
   document.removeEventListener("mousemove", mouseMoveHandler);
   document.removeEventListener("mouseup", mouseUpHandler);
 };
+
+// the function saves the current order of the tasks
+function preserveOrder() {
+  let duplicate = duplicateArray(mainToDoList);
+  mainToDoList = [];
+  let viewedList = document.querySelector("#viewSection").childNodes;
+  for (const container of viewedList) {
+    for (const task of duplicate) {
+      if (task.text === container.querySelector(".todo-text").innerText) {
+        mainToDoList.push(task);
+      }
+    }
+  }
+}

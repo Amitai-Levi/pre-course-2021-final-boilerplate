@@ -66,7 +66,7 @@ describe(projectName, () => {
     browser = await puppeteer.launch({
       headless: false, // Uncomment me to see tests running in browser
       args: ["--disable-web-security"],
-      slowMo: 50, // Uncomment and change me to slow down tests speed in browser.
+      //slowMo: 50, // Uncomment and change me to slow down tests speed in browser.
     });
     page = await browser.newPage();
     useNock(page, ["https://api.jsonbin.io/v3"]);
@@ -268,6 +268,7 @@ describe(projectName, () => {
     await page.waitForSelector(".todo-delete");
 
     await page.click(".todo-delete");
+    await page.click("#save");
 
     const elements = await page.$$(".todo-text");
     expect(elements.length).toBe(0);
@@ -292,6 +293,8 @@ describe(projectName, () => {
     await page.click("#add-button");
 
     await page.click("#clear-button");
+    await page.click("#save");
+
     let clearBtn = "";
     clearBtn = await page.$$("#clear-button");
     await page.waitFor("#clear-button", { innerText: "cleared" });
