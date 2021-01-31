@@ -37,6 +37,23 @@ select,
   padding: 0 0 0 13px;
   border-radius: 50%;
 }
+#tourGuide {
+  -webkit-border-radius: 6;
+  -moz-border-radius: 6;
+  border-radius: 6px;
+  background-color: rgba(107, 139, 180, 0.88);
+  position: absolute;
+  z-index: +5;
+  border-color: white;
+  border-width: 5px;
+  border-style: solid;
+  padding: 20px;
+}
+.spot {
+  -webkit-box-shadow: 0px 0px 50px 50px #ffffff;
+  box-shadow: 0px 0px 50px 50px #ffffff;
+  box-sizing: border-box;
+}
 #search:focus {
   border-radius: 0%;
   width: 300px;
