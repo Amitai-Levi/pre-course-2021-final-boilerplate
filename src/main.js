@@ -337,7 +337,16 @@ function search() {
   const searchText = document.getElementById("search").value;
   for (const task of mainToDoList) {
     if (task.text.includes(searchText)) {
-      document.querySelector("#viewSection").appendChild(TodoRowBuilder(task));
+      let row = TodoRowBuilder(task);
+
+      let rowText = row.querySelector(".todo-text");
+      rowText;
+      let highlighted = rowText.innerHTML.replace(
+        new RegExp(searchText, "g"),
+        `<mark>${searchText}</mark>`
+      );
+      rowText.innerHTML = highlighted;
+      document.querySelector("#viewSection").appendChild(row);
     }
   }
 }
