@@ -1,6 +1,10 @@
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////// page construction ///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 //this list comes from jsonbin and it's the main data of the page
 let mainToDoList = [];
-//this list saves data about undo and redo actions
+//this lists saves data about undo and redo actions
 let undoList = [];
 let redoList = [];
 
@@ -38,37 +42,6 @@ document.querySelector("#clear-button").addEventListener("click", clear);
 
 //setting the counter text to the number of view section's children (each child is a task container)
 document.querySelector("#counter").innerText = mainToDoList.length;
-
-// the function adds a new task by creating a new task element, getting the current data from JSONBIN,
-// pushing it to the list array, and then sending it back to JSONBIN
-async function addNewTask(event) {
-  undoList.push(duplicateArray(mainToDoList));
-  //getting data from the form
-  const taskTextBox = document.querySelector("#text-input");
-  const PrioritySelectBox = document.querySelector("#priority-selector");
-  const time = new Date();
-  event.preventDefault(); // - so the page won't refresh
-
-  //creating a new task element
-  const task = {
-    text: taskTextBox.value,
-    priority: PrioritySelectBox.value,
-    date: time.getTime(),
-    done: false,
-  };
-  if (mainToDoList.some((bin) => task.text === bin.text)) {
-    return alert("This task already exist");
-  }
-  mainToDoList.push(task);
-
-  // reset the form
-  taskTextBox.value = "";
-  PrioritySelectBox.value = 1;
-
-  viewSectionBuilder(mainToDoList);
-  document.querySelector("#save").disabled = false;
-  document.querySelector("#undo").disabled = false;
-}
 
 //the function builds the view section based on the task list
 async function viewSectionBuilder(tasksList = false) {
@@ -172,7 +145,6 @@ function TodoRowBuilder(task) {
   dragButton.classList.add("todo-edit", "fa", "fa-bars");
   deleteNeditContainer.appendChild(dragButton);
 
-  //fa-pencil-square-o
   container.appendChild(deleteNeditContainer);
 
   return container;
@@ -193,6 +165,41 @@ function cleanView() {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////edit functions///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// the function adds a new task by creating a new task element, getting the current data from JSONBIN,
+// pushing it to the list array, and then sending it back to JSONBIN
+async function addNewTask(event) {
+  if (!document.querySelector("#text-input").value) {
+    alert("Task can't be empty");
+    return;
+  }
+  undoList.push(duplicateArray(mainToDoList));
+  //getting data from the form
+  const taskTextBox = document.querySelector("#text-input");
+  const PrioritySelectBox = document.querySelector("#priority-selector");
+  const time = new Date();
+  event.preventDefault(); // - so the page won't refresh
+
+  //creating a new task element
+  const task = {
+    text: taskTextBox.value,
+    priority: PrioritySelectBox.value,
+    date: time.getTime(),
+    done: false,
+  };
+  if (mainToDoList.some((bin) => task.text === bin.text)) {
+    return alert("This task already exist");
+  }
+  mainToDoList.push(task);
+
+  // reset the form
+  taskTextBox.value = "";
+  PrioritySelectBox.value = 1;
+
+  viewSectionBuilder(mainToDoList);
+  document.querySelector("#save").disabled = false;
+  document.querySelector("#undo").disabled = false;
+}
 
 // the function sorts the list in JSONBIN by priority, and then sends the sorted list
 // to 'viewSectionBuilder' so it will rebuild the view section with the sorted list
@@ -417,7 +424,7 @@ const isAbove = function (nodeA, nodeB) {
 const mouseDownHandler = function (e) {
   if (e.target.parentNode.parentNode.classList.contains("draggable")) {
     draggingEle = e.target.parentNode.parentNode;
-    undoList.push(duplicateArray(mainToDoList));
+
     document.querySelector("#save").disabled = false;
 
     // Calculate the mouse position
@@ -487,6 +494,10 @@ const mouseUpHandler = function () {
   // Remove the placeholder
   placeholder && placeholder.parentNode.removeChild(placeholder);
 
+  undoList.push(duplicateArray(mainToDoList));
+  preserveOrder();
+  document.querySelector("#undo").disabled = false;
+
   draggingEle.style.removeProperty("top");
   draggingEle.style.removeProperty("left");
   draggingEle.style.removeProperty("position");
@@ -521,6 +532,9 @@ function preserveOrder() {
 let tourGuide = document.querySelector("#tourGuide");
 function tutorial() {
   tourGuide.innerText = "Welcome to the tutorial!";
+  let guideRect = tourGuide.getBoundingClientRect();
+  tourGuide.style.marginRight = tourGuide.style.width = "300px";
+  window.innerWidth / 2 - guideRect.width / 2 + "px";
   let proceed = document.createElement("button");
   proceed.innerText = "proceed";
   proceed.addEventListener("click", tutorialStep1);
@@ -557,10 +571,21 @@ function tutorialStep2(event) {
   function startEdit(event) {
     tourGuide.innerText =
       'Edit as you wish. when you finish click "V" and "Save" to save your edit.';
-    let saveBtn = document.querySelector("#save");
-    saveBtn.classList.add("spot");
+    let vBtn = document.querySelectorAll(".fa-check");
+    for (const button of vBtn) {
+      button.addEventListener("click", donwEdit);
+      button.classList.add("spot");
+    }
+    function donwEdit() {
+      let saveBtn = document.querySelector("#save");
+      saveBtn.classList.add("spot");
 
-    saveBtn.addEventListener("click", tutorialStep3);
+      saveBtn.addEventListener("click", tutorialStep3);
+      for (const button of vBtn) {
+        button.removeEventListener("click", donwEdit);
+        button.classList.remove("spot");
+      }
+    }
     for (const button of editBtn) {
       button.removeEventListener("click", startEdit);
     }
@@ -638,4 +663,11 @@ function tutorialStep8() {
   barsBtn[0].classList.remove("spot");
 
   tourGuide.innerHTML = "I think that's it. Enjoy!";
+  let proceed = document.createElement("button");
+  proceed.innerText = "Close";
+  proceed.addEventListener("click", closeTutorial);
+  tourGuide.appendChild(proceed);
+}
+function closeTutorial() {
+  tourGuide.hidden = true;
 }
