@@ -1,3 +1,5 @@
+const puppeteer = require("puppeteer");
+
 //this list comes from jsonbin and it's the main data of the page
 let mainToDoList = [];
 //this list saves data about undo and redo actions
@@ -54,10 +56,8 @@ async function addNewTask(event) {
     text: taskTextBox.value,
     priority: PrioritySelectBox.value,
     date: time.getTime(),
+    done: false,
   };
-  console.log("Tak.text = " + task.text);
-  console.log(mainToDoList);
-  console.log(mainToDoList.some((bin) => bin.text));
   if (mainToDoList.some((bin) => task.text === bin.text)) {
     return alert("This task already exist");
   }
@@ -86,6 +86,11 @@ async function viewSectionBuilder(tasksList = false) {
     const container = document.createElement("div");
     container.id = "headline-container";
     container.classList.add("todo-container");
+
+    const isDoneHeadline = document.createElement("span");
+    isDoneHeadline.innerText = "Done";
+    isDoneHeadline.classList.add("grid-headline");
+    container.appendChild(isDoneHeadline);
 
     const priorityHeadline = document.createElement("span");
     priorityHeadline.innerText = "Priority";
@@ -127,6 +132,13 @@ function TodoRowBuilder(task) {
   container.classList.add("todo-container");
   container.classList.add("draggable");
   // container.addEventListener("mousedown", mouseDownHandler);
+
+  const isDone = document.createElement("input");
+  isDone.type = "checkbox";
+  isDone.checked = task.done;
+  isDone.addEventListener("click", checkboxChecked);
+  isDone.classList.add("todo-isDone");
+  container.appendChild(isDone);
 
   const PrioritySpan = document.createElement("span");
   PrioritySpan.innerText = task.priority;
@@ -299,10 +311,21 @@ async function onEdit(event) {
 }
 // thw functions saves the changes by the user
 async function save() {
-  preserveOrder();
-  document.querySelector("#save").disabled = true;
-  await pushToList(mainToDoList);
-  alert("saved!");
+  let isOnEdit = false;
+  let viewedList = document.querySelector("#viewSection").childNodes;
+  for (const container of viewedList) {
+    if (container.querySelector(".fa-times")) {
+      isOnEdit = true;
+    }
+  }
+  if (!isOnEdit) {
+    preserveOrder();
+    document.querySelector("#save").disabled = true;
+    await pushToList(mainToDoList);
+    alert("saved!");
+  } else {
+    alert("Finish editing first!");
+  }
 }
 async function undo() {
   if (undoList.length > 0) {
@@ -326,6 +349,7 @@ async function redo() {
   if (redoList.length > 0) {
     undoList.push(duplicateArray(mainToDoList));
     mainToDoList = redoList.pop();
+    document.querySelector("#undo").disabled = false;
   }
   if (redoList.length === 0) {
     document.querySelector("#redo").disabled = true;
@@ -349,6 +373,11 @@ function search() {
       document.querySelector("#viewSection").appendChild(row);
     }
   }
+}
+async function checkboxChecked(event) {
+  preserveOrder();
+  document.querySelector("#save").disabled = false;
+  await viewSectionBuilder(mainToDoList);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////Drag'n'Drop//////////////////////////////////////////////////////////////////////////
@@ -482,6 +511,7 @@ function preserveOrder() {
   for (const container of viewedList) {
     for (const task of duplicate) {
       if (task.text === container.querySelector(".todo-text").innerText) {
+        task.done = container.querySelector(".todo-isDone").checked;
         mainToDoList.push(task);
       }
     }

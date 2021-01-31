@@ -40,7 +40,7 @@ select,
 #search:focus {
   border-radius: 0%;
   width: 300px;
-  cursor: default;
+  cursor: text;
   transform: scale(1);
 }
 #save {
@@ -95,8 +95,14 @@ h1 {
 .todo-container {
   margin-top: 20px;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
   grid-template-rows: 1;
+}
+.todo-isDone {
+  margin: auto;
+  height: 20px;
+  width: 20px;
+  background-color: red;
 }
 button:hover,
 .fa:hover {
@@ -134,7 +140,7 @@ button:hover,
   -moz-border-radius: 28;
   border-radius: 28px;
 }
-/* loading spinner */
+/* loader animation */
 .loader,
 .loader:before,
 .loader:after {
