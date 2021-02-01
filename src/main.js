@@ -537,53 +537,80 @@ function preserveOrder() {
 //////////////////////////////////////////////////////////// tutorial ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 let tourGuide = document.querySelector("#tourGuide");
+let closeBtn = document.querySelector("#killTourGuide");
+let closed = true;
+
 function tutorial() {
+  closed = false;
   tourGuide.innerText = "Welcome to the tutorial!";
+
   let guideRect = tourGuide.getBoundingClientRect();
+
   tourGuide.style.marginRight = tourGuide.style.width = "300px";
   window.innerWidth / 2 - guideRect.width / 2 + "px";
+
   let proceed = document.createElement("button");
   proceed.innerText = "proceed";
   proceed.addEventListener("click", tutorialStep1);
   tourGuide.appendChild(proceed);
+
   tourGuide.hidden = false;
+  tourGuide.appendChild(closeBtn);
+  closeBtn.hidden = false;
 }
 function tutorialStep1() {
+  if (closed) {
+    return;
+  }
   tourGuide.innerText =
     "Try adding a new ToDo task. First type here your task and choose the priority of that task";
+  tourGuide.appendChild(closeBtn);
+
   let textBox = document.querySelector("#text-input");
   textBox.classList.add("spot");
   let addBtn = document.querySelector("#add-button");
   textBox.focus();
   textBox.addEventListener("keyup", textBoxChanged);
+
   function textBoxChanged() {
-    tourGuide.innerText = 'when you done press the "Add" button';
     textBox.removeEventListener("keyup", textBoxChanged);
+    textBox.classList.remove("spot");
+    if (closed) {
+      return;
+    }
+    tourGuide.innerText = 'when you done press the "Add" button';
     addBtn.addEventListener("click", tutorialStep2);
     addBtn.classList.add("spot");
-    textBox.classList.remove("spot");
+    tourGuide.appendChild(closeBtn);
   }
 }
 function tutorialStep2(event) {
   event.target.removeEventListener("click", tutorialStep2);
   event.target.classList.remove("spot");
-
+  if (closed) {
+    return;
+  }
   tourGuide.innerText =
     'Now you can edit your task.Click the "Edit" button (the pencil icon).';
+  tourGuide.appendChild(closeBtn);
+
   let editBtn = document.querySelectorAll(".todo-edit");
   for (const button of editBtn) {
     button.addEventListener("click", startEdit);
   }
   editBtn[0].classList.add("spot");
-  function startEdit(event) {
+
+  function startEdit() {
     tourGuide.innerText =
       'Edit as you wish. when you finish click "V" and "Save" to save your edit.';
+    tourGuide.appendChild(closeBtn);
+
     let vBtn = document.querySelectorAll(".fa-check");
     for (const button of vBtn) {
-      button.addEventListener("click", donwEdit);
+      button.addEventListener("click", doneEdit);
       button.classList.add("spot");
     }
-    function donwEdit() {
+    function doneEdit() {
       let saveBtn = document.querySelector("#save");
       saveBtn.classList.add("spot");
 
@@ -602,17 +629,24 @@ function tutorialStep2(event) {
 function tutorialStep3(event) {
   event.target.removeEventListener("click", tutorialStep3);
   event.target.classList.remove("spot");
-
+  if (closed) {
+    return;
+  }
   tourGuide.innerHTML =
     'Now let\'s delete a task.<br>Try click the "Delete" button (the trash can icon) in side of a task to delete it.';
+  tourGuide.appendChild(closeBtn);
+
   let deleteBtns = document.querySelectorAll(".todo-delete");
   for (const button of deleteBtns) {
     button.addEventListener("click", deleteTask);
   }
   deleteBtns[0].classList.add("spot");
+
   function deleteTask() {
     tourGuide.innerHTML =
       'Great! <br> Now let\'s review the undo button.<br>Try click the "Undo" button to cancel the last action. ';
+    tourGuide.appendChild(closeBtn);
+
     let undoBtn = document.querySelector("#undo");
     undoBtn.addEventListener("click", tutorialStep4);
     undoBtn.classList.add("spot");
@@ -627,9 +661,14 @@ function tutorialStep3(event) {
 function tutorialStep4(event) {
   event.target.removeEventListener("click", tutorialStep4);
   event.target.classList.remove("spot");
+  if (closed) {
+    return;
+  }
   tourGuide.style.right = "100px";
   tourGuide.innerHTML =
     'Excellent. I think you can guess what the "Redo" button do by your own, so let\'s start with the intresting stuff.<br> We will  start with the search bar.<br>Click the search bar (the magnifighed glass icon). ';
+  tourGuide.appendChild(closeBtn);
+
   let searchBar = document.querySelector("#search");
   searchBar.addEventListener("click", tutorialStep5);
   searchBar.classList.add("spot");
@@ -641,6 +680,8 @@ function tutorialStep5() {
 
   tourGuide.innerHTML =
     " Search for a task (or a part of it). Tell me when you are done ";
+  tourGuide.appendChild(closeBtn);
+
   let proceed = document.createElement("button");
   proceed.innerText = "Done";
   proceed.addEventListener("click", tutorialStep6);
@@ -648,6 +689,9 @@ function tutorialStep5() {
 }
 function tutorialStep6(event) {
   event.target.removeEventListener("click", tutorialStep6);
+  if (closed) {
+    return;
+  }
   tourGuide.innerHTML = "And now, the \"Drag'n' Drop\"";
   let proceed = document.createElement("button");
   proceed.innerText = "proceed";
@@ -657,6 +701,8 @@ function tutorialStep6(event) {
 function tutorialStep7() {
   tourGuide.innerHTML =
     "Click the drag button (the 3 bars icon) and drag a task to re order the list";
+  tourGuide.appendChild(closeBtn);
+
   let barsBtn = document.querySelectorAll(".fa-bars");
   for (const button of barsBtn) {
     button.addEventListener("mousedown", tutorialStep8);
@@ -678,4 +724,9 @@ function tutorialStep8() {
 }
 function closeTutorial() {
   tourGuide.hidden = true;
+  let spotsElements = document.querySelectorAll(".spot");
+  for (const element of spotsElements) {
+    element.classList.remove("spot");
+  }
+  closed = true;
 }
