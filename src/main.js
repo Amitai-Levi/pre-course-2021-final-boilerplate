@@ -35,11 +35,17 @@ async function pushToList(newList) {
   mainToDoList = newList;
   return newList;
 }
-// assigning event listener to 'sort' and 'add' buttons
+// assigning event listener to 'sort' 'clear 'and 'add' buttons
 document.querySelector("#add-button").addEventListener("click", addNewTask);
 document.querySelector("#sort-button").addEventListener("click", sort);
 document.querySelector("#clear-button").addEventListener("click", clear);
-
+//making the ENTER key to activate the ADD button.
+document.querySelector("#text-input").addEventListener("keydown", (event) => {
+  if (event.keyCode === 13) {
+    event.preventDefault();
+    addNewTask(event);
+  }
+});
 //setting the counter text to the number of view section's children (each child is a task container)
 document.querySelector("#counter").innerText = mainToDoList.length;
 
@@ -199,11 +205,16 @@ async function addNewTask(event) {
   viewSectionBuilder(mainToDoList);
   document.querySelector("#save").disabled = false;
   document.querySelector("#undo").disabled = false;
+  taskTextBox.focus();
 }
 
 // the function sorts the list in JSONBIN by priority, and then sends the sorted list
 // to 'viewSectionBuilder' so it will rebuild the view section with the sorted list
 async function sort(event) {
+  // from some reason the ENTER key triggers this function, so the next IF disables it
+  if (event.screenX === 0) {
+    return;
+  }
   undoList.push(duplicateArray(mainToDoList));
   event.preventDefault();
   let tasksList = [];
@@ -283,6 +294,7 @@ async function onEdit(event) {
   TextInput.value = todoText;
   TextInput.requierd = true;
   taskContainer.appendChild(TextInput);
+  TextInput.focus();
 
   const finishEditBtn = document.createElement("i");
   finishEditBtn.addEventListener("click", finishEdit);
@@ -344,11 +356,7 @@ async function undo() {
   await viewSectionBuilder(mainToDoList);
 }
 function duplicateArray(array) {
-  let duplicate = [];
-  for (const element of array) {
-    duplicate.push(element);
-  }
-  return duplicate;
+  return JSON.parse(JSON.stringify(array));
 }
 async function redo() {
   if (redoList.length > 0) {
@@ -622,7 +630,7 @@ function tutorialStep4(event) {
   event.target.classList.remove("spot");
   tourGuide.style.right = "100px";
   tourGuide.innerHTML =
-    'Excellent. I guess you realized the "Redo" button by your own, so let\'s start with the intresting stuff.<br> We will  start with the search bar.<br>Click the search bar (the magnifighed glass icon) and search for a task (or a part of it). ';
+    'Excellent. I think you can guess what the "Redo" button do by your own, so let\'s start with the intresting stuff.<br> We will  start with the search bar.<br>Click the search bar (the magnifighed glass icon). ';
   let searchBar = document.querySelector("#search");
   searchBar.addEventListener("click", tutorialStep5);
   searchBar.classList.add("spot");
@@ -632,7 +640,8 @@ function tutorialStep5() {
   document.querySelector("#search").removeEventListener("click", tutorialStep5);
   document.querySelector("#search").classList.remove("spot");
 
-  tourGuide.innerHTML = "It's OK I'll wait. tell me when you are done ";
+  tourGuide.innerHTML =
+    " Search for a task (or a part of it). Tell me when you are done ";
   let proceed = document.createElement("button");
   proceed.innerText = "Done";
   proceed.addEventListener("click", tutorialStep6);
