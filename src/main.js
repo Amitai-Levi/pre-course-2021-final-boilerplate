@@ -339,7 +339,6 @@ async function save() {
     preserveOrder();
     document.querySelector("#save").disabled = true;
     await pushToList(mainToDoList);
-    alert("saved!");
   } else {
     alert("Finish editing first!");
   }
