@@ -29,13 +29,90 @@ select,
   font-size: 20px;
   box-sizing: border-box;
 }
-#search {
+#specialButtonsContainer {
   position: fixed;
-  right: 15px;
+  width: 100%;
+  background-color: rgba(115, 181, 224, 0.48);
+  padding: 10px;
+}
+/* rgb(76, 224, 243) */
+#search {
+  float: right;
+  margin-right: 15px;
+  margin-left: 0px;
   width: 50px;
   height: 50px;
   padding: 0 0 0 13px;
   border-radius: 50%;
+  display: inline;
+}
+#save,
+#undo,
+#redo {
+  float: left;
+}
+#search:focus {
+  position: fixed;
+  right: 15px;
+  border-radius: 0%;
+  width: 300px;
+  cursor: text;
+  transform: scale(1);
+}
+@media screen and (min-width: 1010px) {
+  #tutorialReference {
+    position: fixed;
+    margin: auto;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+@media screen and (max-width: 1010px) {
+  #tutorialReference {
+    position: relative;
+    /* float: right; */
+    display: inline-block;
+    margin: auto;
+  }
+  #tourGuide {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+@media screen and (max-width: 600px) {
+  #specialButtonsContainer {
+    margin-top: 10px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: left;
+
+    padding: 0;
+    height: 50px;
+    overflow: scroll;
+    overflow-x: hidden;
+  }
+  #save,
+  #undo,
+  #redo,
+  #search:focus {
+    width: 100%;
+  }
+  #search:focus {
+    position: relative;
+    right: 0px;
+  }
+  #search {
+    margin: 0px;
+    width: 100%;
+    padding-left: 2px;
+    transform: scale(1);
+    border-radius: 0%;
+  }
+  #headline-container span {
+    font-size: 4vw;
+  }
 }
 #tourGuide {
   -webkit-border-radius: 6;
@@ -53,27 +130,6 @@ select,
   -webkit-box-shadow: 0px 0px 50px 50px #ffffff;
   box-shadow: 0px 0px 50px 50px #ffffff;
   box-sizing: border-box;
-}
-#search:focus {
-  border-radius: 0%;
-  width: 300px;
-  cursor: text;
-  transform: scale(1);
-}
-#save {
-  position: fixed;
-  left: 15px;
-  top: 15px;
-}
-#undo {
-  position: fixed;
-  left: 140px;
-  top: 15px;
-}
-#redo {
-  position: fixed;
-  left: 255px;
-  top: 15px;
 }
 button:disabled {
   color: gray;
