@@ -234,7 +234,7 @@ async function sort(event) {
       alert(err);
     }
   } else {
-    document.querySelector("#sort-button").innerText = "Sorted BY: Most Recent";
+    document.querySelector("#sort-button").innerText = "Sorted BY: Freestyle";
   }
   viewSectionBuilder(tasksList);
   document.querySelector("#save").disabled = false;

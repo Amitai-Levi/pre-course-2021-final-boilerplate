@@ -64,7 +64,7 @@ const projectName = "pre.Todo App";
 describe(projectName, () => {
   beforeAll(async () => {
     browser = await puppeteer.launch({
-      headless: false, // Uncomment me to see tests running in browser
+      // headless: false, // Uncomment me to see tests running in browser
       args: ["--disable-web-security"],
       //slowMo: 50, // Uncomment and change me to slow down tests speed in browser.
     });
