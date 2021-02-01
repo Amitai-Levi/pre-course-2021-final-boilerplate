@@ -8,6 +8,7 @@ let mainToDoList = [];
 let undoList = [];
 let redoList = [];
 
+// import the data and apply it to the page
 (async function () {
   await getList();
   await viewSectionBuilder();
@@ -169,7 +170,7 @@ function cleanView() {
   }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////edit functions///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////// edit functions ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // the function adds a new task by creating a new task element, getting the current data from JSONBIN,
@@ -536,10 +537,13 @@ function preserveOrder() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////// tutorial ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// defigning global variables, tourGuide = the tutorial element,closeBtn = close button,
+// closed = tells the functions whether the tourGuide is closed
 let tourGuide = document.querySelector("#tourGuide");
 let closeBtn = document.querySelector("#killTourGuide");
 let closed = true;
-
+// this function sets up the tour guide
 function tutorial() {
   closed = false;
   tourGuide.innerText = "Welcome to the tutorial!";
@@ -558,6 +562,9 @@ function tutorial() {
   tourGuide.appendChild(closeBtn);
   closeBtn.hidden = false;
 }
+// all of the following functions have the same structure: removing the last spotted element's spot and event listener
+//  if the guide is closed, stop the prccess -> changing the guide's text -> adding a button ->
+// highlighting the reffered element -> giving that element a event listener that reffers the next function
 function tutorialStep1() {
   if (closed) {
     return;
