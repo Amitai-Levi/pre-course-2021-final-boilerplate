@@ -103,7 +103,7 @@ async function viewSectionBuilder(tasksList = false) {
   document.querySelector("#counter").innerText = mainToDoList.length;
 }
 
-//the function gets a task and makes it a row
+//the function gets a task and makes it a row im the table
 function TodoRowBuilder(task) {
   const container = document.createElement("div");
 
@@ -344,6 +344,7 @@ async function save() {
     alert("Finish editing first!");
   }
 }
+//undo an action by popping the last element from undoList
 async function undo() {
   if (undoList.length > 0) {
     redoList.push(duplicateArray(mainToDoList));
@@ -358,6 +359,7 @@ async function undo() {
 function duplicateArray(array) {
   return JSON.parse(JSON.stringify(array));
 }
+// same principal as undo
 async function redo() {
   if (redoList.length > 0) {
     undoList.push(duplicateArray(mainToDoList));
@@ -369,6 +371,7 @@ async function redo() {
   }
   await viewSectionBuilder(mainToDoList);
 }
+//cheks if the searched value exists in any of the elements, if so, it is displayed and the value is highlighted
 function search() {
   cleanView();
   const searchText = document.getElementById("search").value;
@@ -387,6 +390,7 @@ function search() {
     }
   }
 }
+// when a check box is checked this function saves it as a action so it can be undone
 async function checkboxChecked(event) {
   preserveOrder();
   document.querySelector("#save").disabled = false;
@@ -466,33 +470,17 @@ const mouseMoveHandler = function (e) {
   draggingEle.style.top = `${e.pageY - y}px`;
   draggingEle.style.left = `${e.pageX - x}px`;
   draggingEle.style.width = currentWidth + "px";
-  // The current order
-  // prevEle
-  // draggingEle
-  // placeholder
-  // nextEle
+
   const prevEle = draggingEle.previousElementSibling;
   const nextEle = placeholder.nextElementSibling;
 
-  // The dragging element is above the previous element
-  // User moves the dragging element to the top
   if (prevEle && isAbove(draggingEle, prevEle)) {
-    // The current order    -> The new order
-    // prevEle              -> placeholder
-    // draggingEle          -> draggingEle
-    // placeholder          -> prevEle
     swap(placeholder, draggingEle);
     swap(placeholder, prevEle);
     return;
   }
 
-  // The dragging element is below the next element
-  // User moves the dragging element to the bottom
   if (nextEle && isAbove(nextEle, draggingEle)) {
-    // The current order    -> The new order
-    // draggingEle          -> nextEle
-    // placeholder          -> placeholder
-    // nextEle              -> draggingEle
     swap(nextEle, placeholder);
     swap(nextEle, draggingEle);
   }

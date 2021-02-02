@@ -9,7 +9,6 @@ The app has many features, please read below for more information.
 
 - [The app on GitHub pages](https://amitai-levi.github.io/pre-course-2021-final-boilerplate/src/)
 - [GitHub repository](https://github.com/Amitai-Levi/pre-course-2021-final-boilerplate)
-- [ChallengeMe]()
 
 ## Features
 
